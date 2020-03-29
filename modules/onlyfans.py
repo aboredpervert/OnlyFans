@@ -282,7 +282,7 @@ def profile_scraper(link, session, directory, username):
         download_path = os.path.join(
             directory2, media_link.split("/")[-2]+".jpg")
         if not overwrite_files:
-            if os.path.isfile(download_path):
+            if check_for_dupe_file(download_path):
                 continue
         r = json_request(session, media_link, stream=True,
                          json_format=False, sleep=False)
@@ -585,32 +585,13 @@ def download_media(media_set, session, directory, username, post_count, location
             count = 0
             session = media["session"]
             while count < 11:
-                links = media["links"]
-
-                def choose_link(session, links):
-                    for link in links:
-                        r = json_request(session, link, "HEAD",
-                                         stream=True, json_format=False)
-                        if not r:
-                            continue
-
-                        header = r.headers
-                        content_length = int(header["content-length"])
-                        if not content_length:
-                            continue
-                        return [link, content_length]
-                result = choose_link(session, links)
-                if not result:
-                    count += 1
-                    continue
-                link = result[0]
-                content_length = result[1]
+                link = media["links"][0]
                 date_object = datetime.strptime(
                     media["postedAt"], "%d-%m-%Y %H:%M:%S")
                 download_path = os.path.join(media["directory"],media["filename"])
                 timestamp = date_object.timestamp()
                 if not overwrite_files:
-                    if check_for_dupe_file(download_path, content_length):
+                    if check_for_dupe_file(download_path):
                         format_image(download_path, timestamp)
                         return_bool = False
                         break

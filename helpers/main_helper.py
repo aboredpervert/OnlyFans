@@ -215,14 +215,14 @@ def are_long_paths_enabled():
     return bool(ntdll.RtlAreLongPathsEnabled())
 
 
-def check_for_dupe_file(download_path, content_length):
-    found = False
-    if os.path.isfile(download_path):
-        content_length = int(content_length)
-        local_size = os.path.getsize(download_path)
-        if local_size == content_length:
-            found = True
-    return found
+def check_for_dupe_file(download_path, content_length=None):
+    if not os.path.isfile(download_path):
+        return False
+
+    if content_length is None:
+        return True
+
+    return os.path.getsize(download_path) == int(content_length)
 
 
 def session_rules(session, link):
