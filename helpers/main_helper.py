@@ -290,6 +290,29 @@ def json_request(session, link, method="GET", stream=False, json_format=True, da
             continue
 
 
+def download_to_file(request, download_path):
+    partial_path = download_path + ".part"
+
+    try:
+        os.unlink(partial_path)
+    except FileNotFoundError:
+        pass
+
+    delete = False
+    try:
+        with open(partial_path, 'xb') as f:
+            delete = True
+            for chunk in request.iter_content(chunk_size=1024):
+                if chunk:  # filter out keep-alive new chunks
+                    f.write(chunk)
+    except:
+        if delete:
+            os.unlink(partial_path)
+        raise
+    else:
+        os.replace(partial_path, download_path)
+
+
 def get_config(config_path):
     if os.path.isfile(config_path):
         if os.stat(config_path).st_size > 0:

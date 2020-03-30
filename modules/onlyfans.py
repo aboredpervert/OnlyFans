@@ -16,7 +16,8 @@ from helpers.main_helper import (check_for_dupe_file, clean_text, create_sign,
                                  export_archive, format_directory,
                                  format_image, format_media_set, get_directory,
                                  json_request, log_error, reformat,
-                                 setup_logger, assign_session, filter_metadata)
+                                 setup_logger, assign_session, filter_metadata,
+                                 download_to_file)
 
 log_download = setup_logger('downloads', 'downloads.log')
 
@@ -288,10 +289,7 @@ def profile_scraper(link, session, directory, username):
                          json_format=False, sleep=False)
         if not r:
             continue
-        with open(download_path, 'wb') as f:
-            for chunk in r.iter_content(chunk_size=1024):
-                if chunk:  # filter out keep-alive new chunks
-                    f.write(chunk)
+        download_to_file(r, download_path)
 
 
 def media_scraper(result, sessions, directory, username, api_type):
@@ -600,24 +598,15 @@ def download_media(media_set, session, directory, username, post_count, location
                     return_bool = False
                     count += 1
                     continue
-                delete = False
                 try:
-                    with open(download_path, 'wb') as f:
-                        delete = True
-                        for chunk in r.iter_content(chunk_size=1024):
-                            if chunk:  # filter out keep-alive new chunks
-                                f.write(chunk)
+                    download_to_file(r, download_path)
                 except (ConnectionResetError) as e:
-                    if delete:
-                        os.unlink(download_path)
                     count += 1
                     continue
                 except (requests.exceptions.ConnectionError, requests.exceptions.ChunkedEncodingError) as e:
                     count += 1
                     continue
                 except Exception as e:
-                    if delete:
-                        os.unlink(download_path)
                     log_error.exception(str(e) + "\n Tries: "+str(count))
                     count += 1
                     continue
