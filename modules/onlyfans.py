@@ -14,7 +14,7 @@ from requests.adapters import HTTPAdapter
 import extras.OFSorter.ofsorter as ofsorter
 from helpers.main_helper import (check_for_dupe_file, clean_text, create_sign,
                                  export_archive, format_directory,
-                                 format_image, format_media_set, get_directory,
+                                 format_media_set, get_directory,
                                  json_request, log_error, reformat,
                                  setup_logger, assign_session, filter_metadata,
                                  download_to_file)
@@ -590,7 +590,6 @@ def download_media(media_set, session, directory, username, post_count, location
                 timestamp = date_object.timestamp()
                 if not overwrite_files:
                     if check_for_dupe_file(download_path):
-                        format_image(download_path, timestamp)
                         return_bool = False
                         break
                 r = json_request(session, link, stream=True, json_format=False)
@@ -610,7 +609,6 @@ def download_media(media_set, session, directory, username, post_count, location
                     log_error.exception(str(e) + "\n Tries: "+str(count))
                     count += 1
                     continue
-                format_image(download_path, timestamp)
                 log_download.info("Link: {}".format(link))
                 log_download.info("Path: {}".format(download_path))
                 break
