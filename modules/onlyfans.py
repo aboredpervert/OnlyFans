@@ -314,6 +314,8 @@ def media_scraper(result, sessions, directory, username, api_type):
             media_username = media_user["username"]
             if media_username != username:
                 continue
+        if "expiredAt" in media_api and media_api["expiredAt"] is not None:
+            continue
         for media in media_api["media"]:
             date = "-001-11-30T00:00:00+00:00"
             size = 0
